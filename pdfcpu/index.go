@@ -1,7 +1,9 @@
 package pdfcpu
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strconv"
@@ -9,6 +11,8 @@ import (
 
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 )
 
 type PartialRutData struct {
@@ -68,7 +72,16 @@ func ProcessExtractedPDF(txtPath string) {
 	}
 
 	// Convert extracted content to string
-	contentString := string(extractedContent)
+	decoder := transform.NewReader(bytes.NewReader(extractedContent), charmap.Windows1252.NewDecoder())
+	decoded, err := io.ReadAll(decoder)
+	if err != nil {
+		fmt.Println("Error decoding content:", err)
+		return
+	}
+
+	contentString := string(decoded)
+
+	// Print the content
 	re := regexp.MustCompile(`\(([^)]*)\)`)
 
 	// Find all matches
@@ -85,7 +98,6 @@ func ProcessExtractedPDF(txtPath string) {
 
 	fmt.Printf("id: %v\n", id)
 	fmt.Printf("dv: %v\n", dv)
-	fmt.Printf("extractedContent: %v\n", string(extractedContent))
 
 	extractRemainingFields(remainingLines)
 }
