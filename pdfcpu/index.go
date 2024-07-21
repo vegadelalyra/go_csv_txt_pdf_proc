@@ -81,17 +81,11 @@ func ProcessExtractedPDF(txtPath string) {
 		}
 	}
 
-	// // Write the extracted text to result.txt
-	// err = os.WriteFile("result.txt", []byte(extractedText.String()), 0644)
-	// if err != nil {
-	// 	fmt.Println("Error writing to file:", err)
-	// 	return
-	// }
-
 	id, dv, remainingLines := extractIdentification(extractedText.String())
 
 	fmt.Printf("id: %v\n", id)
 	fmt.Printf("dv: %v\n", dv)
+	fmt.Printf("extractedContent: %v\n", string(extractedContent))
 
 	extractRemainingFields(remainingLines)
 }
