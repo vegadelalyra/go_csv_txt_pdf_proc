@@ -1,7 +1,6 @@
 package pdfcpu
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -33,7 +32,7 @@ type PartialRutData struct {
 	TaxLevel      string
 }
 
-func ExtractRawPDF(pdfPath string) {
+func ExtractRawPDF(pdfPath, fileName string) {
 	// Open the PDF file
 	pdfFile, err := os.Open(pdfPath)
 	if err != nil {
@@ -44,9 +43,6 @@ func ExtractRawPDF(pdfPath string) {
 
 	// No specific output directory needed (set to empty string)
 	outDir := ""
-
-	// No specific filename needed (set to empty string)
-	fileName := "RUT"
 
 	// Empty slice for selectedPages (extract current page)
 	selectedPages := []string{"1"}
@@ -65,14 +61,15 @@ func ExtractRawPDF(pdfPath string) {
 
 func ProcessExtractedPDF(txtPath string) {
 	// Read the extracted content (assuming a single file)
-	extractedContent, err := os.ReadFile(txtPath) // Adjust filename if different
+	extractedContent, err := os.Open(txtPath) // Adjust filename if different
 	if err != nil {
 		fmt.Println("Error reading extracted content:", err)
 		return
 	}
+	defer extractedContent.Close()
 
 	// Convert extracted content to string
-	decoder := transform.NewReader(bytes.NewReader(extractedContent), charmap.Windows1252.NewDecoder())
+	decoder := transform.NewReader(extractedContent, charmap.Windows1252.NewDecoder())
 	decoded, err := io.ReadAll(decoder)
 	if err != nil {
 		fmt.Println("Error decoding content:", err)
@@ -98,6 +95,7 @@ func ProcessExtractedPDF(txtPath string) {
 
 	fmt.Printf("id: %v\n", id)
 	fmt.Printf("dv: %v\n", dv)
+	fmt.Printf("contentString: %v\n", contentString)
 
 	extractRemainingFields(remainingLines)
 }
